@@ -112,22 +112,26 @@ create board 3 3 * cells allot
     then
   again
 ;
- 
 
-\ TODO: find an elegant way
+\ check if the three indices are of same player
+: check-line ( i1 i2 i3 player -- flag flag ) { i1 i2 i3 player }
+    i1 board swap cells + @ player = i2 board swap cells + @ player = i3 board swap cells + @ player =
+;
+
+
 \ Function to check if a player has won
 : check-win ( player -- flag ) { player }
   \ Check rows
-  0 board swap cells + @ player = 1 board swap cells + @ player = 2 board swap cells + @ player = and and
-  3 board swap cells + @ player = 4 board swap cells + @ player = 5 board swap cells + @ player = and and
-  6 board swap cells + @ player = 7 board swap cells + @ player = 8 board swap cells + @ player = and and or or
+  0 1 2 player check-line and and
+  3 6 4 player check-line and and
+  6 7 8 player check-line and and or or
   \ Check columns
-  0 board swap cells + @ player = 3 board swap cells + @ player = 6 board swap cells + @ player = and and
-  1 board swap cells + @ player = 4 board swap cells + @ player = 7 board swap cells + @ player = and and
-  2 board swap cells + @ player = 5 board swap cells + @ player = 8 board swap cells + @ player = and and or or or
+  0 3 6 player check-line and and
+  1 4 7 player check-line and and
+  2 5 8 player check-line and and or or or
   \ Check diagonals
-  0 board swap cells + @ player = 4 board swap cells + @ player = 8 board swap cells + @ player = and and
-  2 board swap cells + @ player = 4 board swap cells + @ player = 6 board swap cells + @ player = and and or or
+  0 4 8 player check-line and and
+  2 4 6 player check-line and and or or
 ;
 
 : game-loop
