@@ -1,6 +1,4 @@
-
- 
-\    The board is an array of lenght 9 with entries:
+\   The board is an array of length 9 with entries:
 \   0: empty
 \   1: player 1 (x)
 \   2: player 2 (o)
@@ -18,7 +16,7 @@ create board 3 3 * cells allot
 ;
 \ displaying board
 
-: drawboard ( b -- b )
+: draw-board ( b -- b )
     ." #################################################" cr
     0 3 swap do \ j represents the row
         0 5 swap do 
@@ -62,25 +60,88 @@ create board 3 3 * cells allot
     loop
 ;
 
+\ Print out the instructions on how to play
+: show-instructions
+  ." Choose the tile by typing in the number corresponding to it, sample board:" cr
+;
+
+: rc-to-index ( row column -- linear-index )
+    swap 3 * +
+;
+
 \ Set a value at a specific position in the board (zero indexed!)
 : set-value ( value row col -- )
-  swap 3 * +  \ Calculate the offset in cells
+  rc-to-index \ Calculate the offset in cells
   board swap cells + ! \ Store the value at the calculated offset
 ;
 
-
-init-board
-
 \ Example usage:
-1 1 2 set-value  \ Set the value 1 at row 1, column 2 (zero indexed!)
-2 2 2 set-value  \ Set the value 2 at row 2, column 2 (zero indexed!)
-
 \ here are some examples for setting values in the board
+\ init-board
+\ 1 1 2 set-value  \ Set the value 1 at row 1, column 2 (zero indexed!)
+\ 2 2 2 set-value  \ Set the value 2 at row 2, column 2 (zero indexed!)
 
+: free ( field -- flag )
+    board swap cells + @ 0 =  \ Check if the field is not empty
+;
 
+: index-to-rc ( linear-index -- row column )
+  3 /mod  \ Divide the linear index by 3, giving quotient and remainder
+  swap     \ Swap the quotient and remainder
+;
 
-drawboard
-draw-sample-board
+: get-player-move ( board-entry -- )
+  begin
+    key 
+    dup [char] s = if
+        cr draw-sample-board quit
+    else
+        dup [char] q = if
+                ." Quit chosen." cr bye
+            else
+                dup [char] 0 [char] 9 within if \ sum sum is funky here
+                    dup [char] 0 - free if 
+                            [char] 0 - index-to-rc set-value exit
+                        else
+                            drop cr ." Field already occupied, please try again [0-8]: " cr
+                        then
+                else
+                    drop cr ." Wrong input, please try again [0-8]: " cr
+            then
+        then
+    then
+  again
+;
+ 
 
-\ TODO: as a player either input one of the numbers 0-8 or q to quit or s to show sample board
+\ TODO: find an elegant way
+\ Function to check if a player has won
+: check-win ( player -- flag ) { player }
+  \ Check rows
+  0 board swap cells + @ player = 1 board swap cells + @ player = 2 board swap cells + @ player = and and
+  3 board swap cells + @ player = 4 board swap cells + @ player = 5 board swap cells + @ player = and and
+  6 board swap cells + @ player = 7 board swap cells + @ player = 8 board swap cells + @ player = and and or or
+  \ Check columns
+  0 board swap cells + @ player = 3 board swap cells + @ player = 6 board swap cells + @ player = and and
+  1 board swap cells + @ player = 4 board swap cells + @ player = 7 board swap cells + @ player = and and
+  2 board swap cells + @ player = 5 board swap cells + @ player = 8 board swap cells + @ player = and and or or or
+  \ Check diagonals
+  0 board swap cells + @ player = 4 board swap cells + @ player = 8 board swap cells + @ player = and and
+  2 board swap cells + @ player = 4 board swap cells + @ player = 6 board swap cells + @ player = and and or or
+;
 
+: game-loop
+  init-board
+  show-instructions
+  draw-sample-board
+  9 0 do
+    i 2 mod 1+ get-player-move
+    draw-board
+    i 3 > if
+        i 2 mod 1+ dup check-win if cr ." Player " . ." has won" cr bye else drop then
+        i 8 = if cr ."  Stalemate" cr bye then
+    then
+  loop
+;
+
+game-loop
