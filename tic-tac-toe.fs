@@ -94,7 +94,7 @@ create board 3 3 * cells allot
   begin
     key 
     dup [char] s = if
-        cr draw-sample-board quit
+        cr draw-sample-board drop
     else
         dup [char] q = if
                 ." Quit chosen." cr bye
