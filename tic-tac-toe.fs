@@ -99,7 +99,7 @@ create board 3 3 * cells allot
         dup [char] q = if
                 ." Quit chosen." cr bye
             else
-                dup [char] 0 [char] 9 within if \ sum sum is funky here
+                dup [char] 0 [char] 9 within if 
                     dup [char] 0 - free if 
                             [char] 0 - index-to-rc set-value exit
                         else
@@ -154,8 +154,8 @@ create board 3 3 * cells allot
     i 2 mod 1+ get-player-move
     draw-board
     i 3 > if
-        i 2 mod 1+ dup check-win if cr ." Player " . ." has won" cr bye else drop then
-        i 8 = if cr ."  Stalemate" cr bye then
+        i 2 mod 1+ dup check-win if cr ." Player " . ." has won" cr leave else drop then
+        i 8 = if cr ."  Stalemate" cr leave then
     then
   loop
 ;
